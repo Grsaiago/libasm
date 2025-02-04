@@ -28,7 +28,7 @@ $(OUT_DIR)/%.o: $(SRC_DIR)/%.s
 
 # Run tests
 .PHONY: run-tests
-run-tests: build ## Runs all tests using criterion
+t: build ## Runs all tests using criterion
 	@gcc -lcriterion main.c $(wildcard $(OUT_DIR)/*.o) -o tests
 	@./tests
 

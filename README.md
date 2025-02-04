@@ -5,7 +5,8 @@ Recreating a bunch of glibc functions in x86 asm
 ## References
 
 [Main blog post](https://blog.rchapman.org/posts/Linux_System_Call_Table_for_x86_64/)\
-[Calling convention for 64](https://www.uclibc.org/docs/psABI-x86_64.pdf): On A.2.1: Calling Conventions\
+[Calling convention for 64](https://www.uclibc.org/docs/psABI-x86_64.pdf):
+On A.2.1: Calling Conventions\
 [Nasm instructions in depth documentation](https://nasm.us/doc/)\
 [Documentation on each instruction](https://www.felixcloutier.com/x86/)\
 [Intel in depth docs](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html)
@@ -22,3 +23,11 @@ chapter A.2.1: Calling Conventions
 Q: In which register should I store the return value of a function?\
 A: See [Calling Conventions](https://www.uclibc.org/docs/psABI-x86_64.pdf),
 end of chapter 3.2.3, on the "Returning of Values".
+
+Q: Which register should I use to store a counter?\
+A: rcx is commonly the one used. It is implied by the loop section on the intel
+documentation.
+
+## TODOS
+
+- [ ] Add a function prelude to all functions ([reference](https://www.youtube.com/watch?v=U9HXtrDwxVM))
