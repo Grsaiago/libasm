@@ -1,8 +1,8 @@
 SRC_DIR = src
 OUT_DIR = objects
 
-SRCS = $(wildcard $(SRC_DIR)/*.asm)
-OBJS = $(patsubst $(SRC_DIR)/%.asm, $(OUT_DIR)/%.o, $(SRCS))
+SRCS = $(wildcard $(SRC_DIR)/*.s)
+OBJS = $(patsubst $(SRC_DIR)/%.s, $(OUT_DIR)/%.o, $(SRCS))
 
 NASM = nasm -f elf64
 
@@ -23,7 +23,7 @@ $(OUT_DIR):
 	mkdir -p $(OUT_DIR)
 
 # Rule to create object files
-$(OUT_DIR)/%.o: $(SRC_DIR)/%.asm
+$(OUT_DIR)/%.o: $(SRC_DIR)/%.s
 	$(NASM) $< -o $@
 
 # Run tests
@@ -35,4 +35,7 @@ run-tests: build ## Runs all tests using criterion
 .PHONY: clean
 clean: ## Clears the objects folder
 	@rm -f $(OUT_DIR)/*.o
+
+.PHONY: fclean
+fclean: clean ## Clears the objects folder and the test binary
 	@rm tests
