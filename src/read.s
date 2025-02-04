@@ -18,4 +18,3 @@ error_path:
 	mov	[rax], rcx ; *rax = rcx;
 	mov	rax, -1 ; the syscall return value
 	ret
-

@@ -1,5 +1,6 @@
 #include "my_asm.h"
 #include <criterion/criterion.h>
+#include <criterion/internal/new_asserts.h>
 #include <criterion/internal/test.h>
 #include <criterion/new/assert.h>
 #include <signal.h>
@@ -51,7 +52,7 @@ Test(write, primary_test) {
 	close(pipefd[1]);
 
 	// compare original version results against asm version
-	cr_assert(eq(int, strcmp(asm_readbuff, or_readbuff), 0), "the messages received should be equal");
+	cr_assert(eq(int, strcmp(asm_readbuff, or_readbuff), 0), "the messages received should be equal, instead they're:\nasm_readbuff [%s]\nor_readbuff [%s]", asm_readbuff, or_readbuff);
 	cr_assert(eq(int, asm_func_return_value, or_func_return_value), "the return values should be equal");
 	cr_assert(eq(int, asm_func_errno, or_func_errno), "The errno values should be the same");
 }
@@ -177,4 +178,40 @@ Test(strmcp, shorter_but_equal) {
 	or_func_return_value = strcmp(s1, s2);
 
 	cr_assert(eq(int, asm_func_return_value, or_func_return_value), "The return values should be 0");
+}
+
+Test(strcpy, primary_test) {
+	char	message1[] = "isso é um teste";
+	char	message2[] = "Isso aqui é uma mensagem maior ainda";
+	char	message3[] = "E essa é pequena";
+	char	or_dest[sizeof(message2) + 1] = {0};
+	char	asm_dest[sizeof(message2) + 1] = {0};
+
+	char	*asm_func_return_value;
+	char	*or_func_return_value;
+
+	// write message1 into buffers
+	asm_func_return_value = asm_strcpy(asm_dest, message1);
+	or_func_return_value = strcpy(or_dest, message1);
+
+	cr_assert(eq(ptr, asm_func_return_value, asm_dest), "return value should be dst");
+	cr_assert(eq(int, strcmp(asm_dest, or_dest), 0), "the dest buffers should be the same, but are:\nasm_dest [%s]\nor_dest [%s]", asm_dest, or_dest);
+
+	// write message2 into buffers
+	asm_func_return_value = asm_strcpy(asm_dest, message2);
+	or_func_return_value = strcpy(or_dest, message2);
+
+	cr_assert(eq(ptr, asm_func_return_value, asm_dest), "return value should be dst");
+	cr_assert(eq(int, strcmp(asm_dest, or_dest), 0), "the dest buffers should be the same, but are:\nasm_dest [%s]\nor_dest [%s]", asm_dest, or_dest);
+
+	// write message3 into buffers
+	asm_func_return_value = asm_strcpy(asm_dest, message3);
+	or_func_return_value = strcpy(or_dest, message3);
+
+	cr_assert(eq(ptr, asm_func_return_value, asm_dest), "return value should be dst");
+	cr_assert(eq(int, strcmp(asm_dest, or_dest), 0), "the dest buffers should be the same, but are:\nasm_dest [%s]\nor_dest [%s]", asm_dest, or_dest);
+}
+
+Test(strcpy, should_segfault, .signal = SIGSEGV) {
+	asm_strcpy(NULL, "oie");
 }
