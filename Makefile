@@ -1,15 +1,10 @@
-SRC_DIR = ./src
+SRC_DIR = src
+OUT_DIR = objects
 
-OBJ_DIR = ./build
-
-OUT_DIR = ./bin
+SRCS = $(wildcard $(SRC_DIR)/*.asm)
+OBJS = $(patsubst $(SRC_DIR)/%.asm, $(OUT_DIR)/%.o, $(SRCS))
 
 NASM = nasm -f elf64
-
-LINK = ld -m elf_x86_64
-
-HELLO_SRC = $(SRC_DIR)/hello.asm
-HELLO_CMD =
 
 .PHONY: all
 all: help
@@ -19,11 +14,25 @@ help: ## Prints help for targets with comments
 	@echo "Available Rules:"
 	@cat $(MAKEFILE_LIST) | grep -E '^[a-zA-Z_-]+:.*?## .*$$' | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-.PHONY: build-hello
-build-hello: $(HELLO_SRC) ## Builds the hello cmd
-	@$(NASM) $(HELLO_SRC) -o $(OBJ_DIR)/hello.o
-	@$(LINK) $(OBJ_DIR)/hello.o -o $(OUT_DIR)/hello
+# Build target depends on the output directory and object files
+.PHONY: build
+build: $(OUT_DIR) $(OBJS)
 
-.PHONY: run-hello
-run-hello: build-hello ## Builds and runs the Hello cmd
-	@$(OUT_DIR)/hello
+# Rule to create the output directory
+$(OUT_DIR):
+	mkdir -p $(OUT_DIR)
+
+# Rule to create object files
+$(OUT_DIR)/%.o: $(SRC_DIR)/%.asm
+	$(NASM) $< -o $@
+
+# Run tests
+.PHONY: run-tests
+run-tests: build ## Runs all tests using criterion
+	@gcc -lcriterion main.c $(wildcard $(OUT_DIR)/*.o) -o tests
+	@./tests
+
+.PHONY: clean
+clean: ## Clears the objects folder
+	@rm -f $(OUT_DIR)/*.o
+	@rm tests
