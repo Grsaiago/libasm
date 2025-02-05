@@ -27,10 +27,10 @@ $(OUT_DIR)/%.o: $(SRC_DIR)/%.s
 	$(NASM) $< -o $@
 
 # Run tests
-.PHONY: run-tests
+.PHONY: t
 t: build ## Runs all tests using criterion
 	@gcc -lcriterion main.c $(wildcard $(OUT_DIR)/*.o) -o tests
-	@./tests
+	@./tests --verbose
 
 .PHONY: clean
 clean: ## Clears the objects folder
