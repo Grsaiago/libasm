@@ -1,10 +1,15 @@
+NAME = libasm.a
+
 SRC_DIR = src
 OUT_DIR = objects
+TEST_BIN_NAME = test
+
+NASM = nasm -f elf64
 
 SRCS = $(wildcard $(SRC_DIR)/*.s)
 OBJS = $(patsubst $(SRC_DIR)/%.s, $(OUT_DIR)/%.o, $(SRCS))
+LINK_CRITERION = -lcriterion
 
-NASM = nasm -f elf64
 
 .PHONY: all
 all: help
@@ -16,7 +21,10 @@ help: ## Prints help for targets with comments
 
 # Build target depends on the output directory and object files
 .PHONY: build
-build: $(OUT_DIR) $(OBJS)
+build: $(OUT_DIR) $(OBJS) $(NAME) ## Builds the .a lib file in the root
+
+$(NAME): $(OBJS)
+	@ar -rcs $(NAME) $(OBJS)
 
 # Rule to create the output directory
 $(OUT_DIR):
@@ -27,15 +35,16 @@ $(OUT_DIR)/%.o: $(SRC_DIR)/%.s
 	$(NASM) $< -o $@
 
 # Run tests
-.PHONY: t
-t: build ## Runs all tests using criterion
-	@gcc -lcriterion main.c $(wildcard $(OUT_DIR)/*.o) -o tests
-	@./tests --verbose
+.PHONY: run-tests
+run-tests: build ## Runs all tests using criterion
+	@gcc $(LINK_CRITERION) main.c $(NAME) -o $(TEST_BIN_NAME)
+	@./$(TEST_BIN_NAME) --verbose
 
 .PHONY: clean
-clean: ## Clears the objects folder
-	@rm -f $(OUT_DIR)/*.o
+clean: ## Deletes the lib file (.a)
+	@rm -f $(NAME)
+	@rm -f $(TEST_BIN_NAME)
 
 .PHONY: fclean
-fclean: clean ## Clears the objects folder and the test binary
-	@rm tests
+fclean: clean ## Deletes the lib file, clears the objects folder, and deletes the test binary
+	@rm -rf $(OUT_DIR)
