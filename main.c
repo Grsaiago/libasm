@@ -215,3 +215,17 @@ Test(strcpy, primary_test) {
 Test(strcpy, should_segfault, .signal = SIGSEGV) {
 	asm_strcpy(NULL, "oie");
 }
+
+Test(strdup, simple_dup) {
+	char	str1[] = "String numero 1";
+	char	str2[] = "Essa é a segunda mensagem em";
+	char	*dup;
+
+	dup = asm_strdup(str1);
+	cr_assert(eq(int, strcmp(dup, str1), 0), "the buffers should be equal, but are:\noriginal [%s]\ndup [%s]", str1, dup);
+	free(dup);
+
+	dup = asm_strdup(str2);
+	cr_assert(eq(int, strcmp(dup, str2), 0), "the buffers should be equal, but are:\noriginal [%s]\ndup [%s]", str2, dup);
+	free(dup);
+}
