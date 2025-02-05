@@ -3,13 +3,14 @@
 
 This project provides x86-64 assembly implementations of common C standard
 library functions, including `read`, `write`, `strlen`, `strcmp`, `strcpy`, and `strdup`.\
+It adheres as much as possible to the [x86-64 calling conventions](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html)
+and the [System V ABI](https://www.uclibc.org/docs/psABI-x86_64.pdf).\
 It uses `libcriterion` as a testing framework, so you can see not only
 what I've done, but how I've tested it!
 
-
 ## 📂 Project Structure
 
-```
+```sh
 .
 ├── Makefile                # Build automation
 ├── Dockerfile              # Container setup for testing
@@ -21,13 +22,7 @@ what I've done, but how I've tested it!
 │   ├── strdup.s            # Implementation of `strdup`
 │   ├── strlen.s            # Implementation of `strlen`
 │   └── write.s             # Implementation of `write`
-├── tests/                  # Test suite using libcriterion
-│   ├── test_read.c         # Tests for `read`
-│   ├── test_strcmp.c       # Tests for `strcmp`
-│   ├── test_strcpy.c       # Tests for `strcpy`
-│   ├── test_strdup.c       # Tests for `strdup`
-│   ├── test_strlen.c       # Tests for `strlen`
-│   └── test_write.c        # Tests for `write`
+├── main.c                  # The tests for all functions and calling in C.
 └── objects/                # Compiled object files
 ```
 
@@ -48,11 +43,20 @@ Just `man <function_name>` and that's it!
 
 ### Interoperability with C
 
-The assembly functions are designed to be called from C code, adhering to the x86-64 calling convention.
-For example, to call `strcmp` from C:
+Since the function's implementations adhere to
+the [System V ABI](https://www.uclibc.org/docs/psABI-x86_64.pdf), calling one of
+the assembly functions is as simple as including and calling.\
+For example, to call `asm_strcmp` in a C file:
 
 ```c
+
+// include the function like this:
 extern int asm_strcmp(const char *s1, const char *s2);
+// or just include all my asm functions like this:
+#include "libasm.h"
+// Don't worry about double inclusion, there's an IFNDEF in there ;)
+
+// and use it!
 int result = asm_strcmp("hello", "world");
 ```
 
