@@ -28,11 +28,11 @@ $(NAME): $(OBJS)
 
 # Rule to create the output directory
 $(OUT_DIR):
-	mkdir -p $(OUT_DIR)
+	@mkdir -p $(OUT_DIR)
 
 # Rule to create object files
 $(OUT_DIR)/%.o: $(SRC_DIR)/%.s
-	$(NASM) $< -o $@
+	@$(NASM) $< -o $@
 
 # Run tests
 .PHONY: run-tests
@@ -41,10 +41,11 @@ run-tests: build ## Runs all tests using criterion
 	@./$(TEST_BIN_NAME) --verbose
 
 .PHONY: clean
-clean: ## Deletes the lib file (.a)
-	@rm -f $(NAME)
+clean: ## Deletes the build artifacts and the test binary
+	@rm -f $(OBJS)
 	@rm -f $(TEST_BIN_NAME)
 
 .PHONY: fclean
 fclean: clean ## Deletes the lib file, clears the objects folder, and deletes the test binary
+	@rm -f $(NAME)
 	@rm -rf $(OUT_DIR)
