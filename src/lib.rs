@@ -77,7 +77,23 @@ mod safe_asm {
         }
         CmpResult::Equal
     }
-    //pub fn safe_strcpy(dest: *mut c_char, src: *const c_char) -> *const c_char;
+
+    #[allow(unused)]
+    pub fn safe_strcpy(dest: &mut [u8], src: &str) -> Result<(), LibasmErrorKind> {
+        if dest.len() < src.len() + 1 {
+            return Err(LibasmErrorKind::GenericError(
+                "dest is can't store src".to_string(),
+            ));
+        }
+        let c_src =
+            CString::from_str(src).map_err(|err| LibasmErrorKind::GenericError(err.to_string()))?;
+        unsafe {
+            let dest_ptr = dest.as_ptr() as *mut i8;
+            asm_strcpy(dest_ptr, c_src.as_ptr());
+        }
+        Ok(())
+    }
+
     #[allow(unused)]
     pub fn safe_strdup(s: &str) -> Result<String, LibasmErrorKind> {
         let len = match safe_strlen(s) {
@@ -173,5 +189,32 @@ mod strdup_tests {
             safe_asm::safe_strdup(&example_string).unwrap(),
             example_string
         );
+    }
+}
+
+#[cfg(test)]
+mod strcpy_tests {
+    use super::*;
+
+    #[test]
+    fn success_test() {
+        let test_string = "cinco";
+        let mut dest: [u8; 6] = [0; 6];
+
+        assert!(safe_asm::safe_strcpy(&mut dest, test_string).is_ok());
+        assert_eq!(dest[0], b'c');
+        assert_eq!(dest[1], b'i');
+        assert_eq!(dest[2], b'n');
+        assert_eq!(dest[3], b'c');
+        assert_eq!(dest[4], b'o');
+        assert_eq!(dest[5], b'\0');
+    }
+
+    #[test]
+    fn invalid_src_len() {
+        let test_string = "cincoo";
+        let mut dest: [u8; 6] = [0; 6];
+
+        assert!(safe_asm::safe_strcpy(&mut dest, test_string).is_err())
     }
 }
