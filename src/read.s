@@ -3,10 +3,16 @@ extern __errno_location
 
 section .text
 asm_read:
+	push	rbp ; function prologue
+	mov	rbp, rsp; function prologue
+
 	mov	rax, 0 ; read syscall
 	syscall ; the registers already have the correct values loaded
 	test	rax, rax
 	js	error_path
+
+	mov	rsp, rbp ; function epilogue
+	pop	rbp ; function epilogue
 	ret
 
 error_path:
@@ -17,4 +23,7 @@ error_path:
 	pop	rcx
 	mov	[rax], rcx ; *rax = rcx;
 	mov	rax, -1 ; the syscall return value
+
+	mov	rsp, rbp ; function epilogue
+	pop	rbp ; function epilogue
 	ret

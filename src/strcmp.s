@@ -2,6 +2,9 @@ global asm_strcmp
 
 section .text
 asm_strcmp:
+	push	rbp ; function prologue
+	mov	rbp, rsp; function prologue
+
 	xor	rcx, rcx; i = 0
 loop:
 	mov	al, byte [rdi + rcx] ; calcula e carrega o que contém nesse endereço no rax
@@ -13,10 +16,16 @@ loop:
 	inc	rcx
 	jmp	loop
 good_ending:
+	mov	rsp, rbp ; function epilogue
+	pop	rbp ; function epilogue
+
 	mov	rax, 0;
 	ret
 bad_ending:
 	movzx	rax, al
 	movzx	rdx, dl
 	sub	rax, rdx ; the values are already in those registers because of the mov
+
+	mov	rsp, rbp ; function epilogue
+	pop	rbp ; function epilogue
 	ret

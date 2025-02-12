@@ -2,6 +2,9 @@ global asm_strlen
 
 section .text
 asm_strlen:
+	push	rbp ; function prologue
+	mov	rbp, rsp; function prologue
+
 	xor	rcx, rcx; i = 0
 ; while
 count_loop:
@@ -12,4 +15,7 @@ count_loop:
 ; end while
 end:
 	mov	rax, rcx; rax tem que ter o valor de retorno da função
+
+	mov	rsp, rbp ; function epilogue
+	pop	rbp ; function epilogue
 	ret

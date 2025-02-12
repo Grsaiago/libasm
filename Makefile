@@ -39,6 +39,7 @@ $(OUT_DIR)/%.o: $(SRC_DIR)/%.s
 run-tests: build ## Runs all tests using criterion
 	@gcc $(LINK_CRITERION) main.c $(NAME) -o $(TEST_BIN_NAME)
 	@./$(TEST_BIN_NAME) --verbose
+	@cargo t
 
 .PHONY: clean
 clean: ## Deletes the build artifacts and the test binary
@@ -49,3 +50,7 @@ clean: ## Deletes the build artifacts and the test binary
 fclean: clean ## Deletes the lib file, clears the objects folder, and deletes the test binary
 	@rm -f $(NAME)
 	@rm -rf $(OUT_DIR)
+	@rm -rf target/
+
+.PHONY: re
+re: fclean build ## Calls fclean and then build
