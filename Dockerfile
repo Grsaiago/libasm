@@ -1,4 +1,4 @@
-FROM debian:latest
+FROM rust:latest
 
 RUN apt-get update && apt-get install -y \
 	gcc \
@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-COPY ./main.c ./Makefile ./my_asm.h /app/
+COPY ./main.c ./Makefile ./libasm.h Cargo.lock Cargo.toml build.rs /app/
 COPY ./src/ /app/src
 
 ENTRYPOINT [ "make", "run-tests" ]
