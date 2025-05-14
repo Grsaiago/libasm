@@ -60,10 +60,35 @@ extern int asm_strcmp(const char *s1, const char *s2);
 int result = asm_strcmp("hello", "world");
 ```
 
-### Full Test Coverage
+### 🦀Rust Bindings
 
-There's a series of tests for each function using `libcriterion`.
-There's tests for happy paths and for not so happy paths xD.
+We also have Rust bindings to the asm functions via a ✨ C FFI layer ✨.
+So if you're feeling spicy and want to call raw x86 System V ABI compliant assembly from safe Rust, you're in luck.
+
+#### How It Works
+1. The assembly functions are exposed to C via a standard .h header.
+2. Rust uses a build.rs and hand-written extern definitions to call the C API.
+3. Safe Rust wrappers are provided to ensure memory safety and ergonomic usage.
+
+Example:
+
+```rust
+    pub fn safe_strlen(string: &str) -> Result<usize, LibasmErrorKind> {
+        let len: usize;
+        unsafe {
+            let ptr = CString::from_str(string)
+                .map_err(|val| LibasmErrorKind::GenericError(val.to_string()))?;
+            if ptr.is_empty() {
+                Err(LibasmErrorKind::GenericError(
+                    "the string would segfault".to_string(),
+                ))?;
+            }
+            len = asm_strlen(ptr.as_ptr());
+        }
+        Ok(len)
+    }
+```
+This allows you to use the asm functions in Rust through a safe interface!
 
 ### Easy Setup
 
@@ -126,9 +151,9 @@ docker container run --rm libasm
 
 ## 🧪 Testing
 
-The project uses `libcriterion` (an absolute banger of a framework) for testing.\
-All tests are in the same file, divided by each function. To run all the tests
-just go for:
+The project uses `libcriterion` (an absolute banger of a framework) for testing the C part (the happy paths, and the not so happy paths).\
+All C tests are in the same file, divided by each function. And all Rust tests are in the lib.rs file.
+To run both C and Rust tests just go for:
 
 ```bash
 make run-tests
